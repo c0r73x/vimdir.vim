@@ -13,7 +13,7 @@ if exists("g:loaded_vimdir")
 endif
 
 let g:loaded_vimdir = 1
-let g:vimdir_verbose = 1
+"let g:vimdir_verbose = 1
 
 if ! exists("g:vimdir_verbose")
     let g:vimdir_verbose = 0
