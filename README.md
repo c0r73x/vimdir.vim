@@ -2,6 +2,7 @@ vimdir.vim
 ==========
 
 Manage files and directories in vim
+
 Inspired by vidir by Joey Hess (https://joeyh.name/code/moreutils/)
 
 ### Requirements and Installation
