@@ -13,7 +13,6 @@ if exists("g:loaded_vimdir")
 endif
 
 let g:loaded_vimdir = 1
-"let g:vimdir_verbose = 1
 
 if ! exists("g:vimdir_verbose")
     let g:vimdir_verbose = 0
@@ -156,8 +155,20 @@ function! s:list(...)
     let b:files = []
 
     if exists("a:1")
-        exec "lcd".fnamemodify(expand(a:1), ':p')
-        exec s:push(a:1, 1)
+        let l:fname = fnamemodify(expand(a:1), ':p')
+
+        if !empty(glob(l:fname)) && isdirectory(l:fname)
+            exec "lcd".l:fname
+            exec s:push(a:1, 1)
+        else
+            call delete(expand('%'))
+            exec 'bdelete!'
+
+            echohl ErrorMsg
+                        \ | echomsg "Couldn't open directory \"" .a:1."\""
+                        \ | echohl None
+            return
+        endif
     else
         exec s:push('.', 1)
     endif
