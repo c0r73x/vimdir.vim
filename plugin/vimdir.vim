@@ -113,7 +113,9 @@ function! s:process()
     endfor
 
     call delete(expand('%'))
-    exec 'bdelete!'
+    exec '%delete'
+
+    call s:list()
 endfunction
 
 function! s:push(path, first)
@@ -142,34 +144,42 @@ function! s:push(path, first)
 endfunction
 
 function! s:list(...)
-    let l:file = tempname()
-    execute "badd ".l:file
-    execute "buffer ".l:file
+    let l:path = '.'
 
-    setlocal ft=vimdir
-    setlocal syntax=vidir-ls " Using vidir-ls vimplugin
-    setlocal nolist
-    setlocal textwidth=0
+    if exists("b:vimdir_path")
+        let l:path = b:vimdir_path
+    else
+        if exists("a:1")
+            let l:path = a:1
+        endif
+
+        let l:file = tempname()
+        execute "badd ".l:file
+        execute "buffer ".l:file
+
+        setlocal ft=vimdir
+        setlocal syntax=vidir-ls " Using vidir-ls vimplugin
+        setlocal nolist
+        setlocal textwidth=0
+
+        let b:vimdir_path = l:path
+    endif
 
     let b:dirs = []
     let b:files = []
 
-    if exists("a:1")
-        let l:fname = fnamemodify(expand(a:1), ':p')
+    let l:fname = fnamemodify(expand(l:path), ':p')
 
-        if !empty(glob(l:fname)) && isdirectory(l:fname)
-            exec s:push(a:1, 1)
-        else
-            call delete(expand('%'))
-            exec 'bdelete!'
-
-            echohl ErrorMsg
-                        \ | echomsg "Couldn't open directory \"" .a:1."\""
-                        \ | echohl None
-            return
-        endif
+    if !empty(glob(l:fname)) && isdirectory(l:fname)
+        exec s:push(l:path, 1)
     else
-        exec s:push('.', 1)
+        call delete(expand('%'))
+        exec 'bdelete!'
+
+        echohl ErrorMsg
+                    \ | echomsg "Couldn't open directory \"" .a:1."\""
+                    \ | echohl None
+        return
     endif
 
     if exists("s:recursive")

@@ -52,3 +52,8 @@ let g:vimdir_show_hidden = 1
 
 You can use the bin/vimdir script to execute vimdir directly from the terminal.
 Just place it in your path and run vimdir.
+
+## Todo
+
+- Fix file swapping (a => b, b => a)
+- Add support to expand folders
