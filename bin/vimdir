@@ -1,0 +1,35 @@
+#!/bin/bash
+
+VIMDIR='Vimdir'
+HIDDEN=''
+
+while getopts "rHh" c; do
+    case "$c" in
+        r)
+            VIMDIR='VimdirR'
+            ;;
+        H)
+            HIDDEN=':let g:vimdir_show_hidden=1 |'
+            ;;
+        h)
+            echo "Usage:"
+            echo "  $(basename $0) [options] <directory>"
+            echo "Options:"
+            echo -e "  -r\trecursive"
+            echo -e "  -H\tshow hidden files"
+            echo -e "  -h\thelp"
+            exit
+            ;;
+        :)
+            echo "Option -$OPTARG requires an argument." >&2
+            exit 1
+            ;;
+    esac
+done
+
+dir="${@: -1}"
+if [[ ! $dir =~ ^- ]]; then
+    eval "vim -c \"$HIDDEN:$VIMDIR $dir\""
+else
+    eval "vim -c \"$HIDDEN:$VIMDIR\""
+fi

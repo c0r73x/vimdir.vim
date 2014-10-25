@@ -47,3 +47,8 @@ To show hidden files and folders set this in your vimrc
 ```
 let g:vimdir_show_hidden = 1
 ```
+
+## bin/vimdir
+
+You can use the bin/vimdir script to execute vimdir directly from the terminal.
+Just place it in your path and run vimdir.
