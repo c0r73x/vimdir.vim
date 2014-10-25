@@ -158,7 +158,6 @@ function! s:list(...)
         let l:fname = fnamemodify(expand(a:1), ':p')
 
         if !empty(glob(l:fname)) && isdirectory(l:fname)
-            exec "lcd".l:fname
             exec s:push(a:1, 1)
         else
             call delete(expand('%'))
