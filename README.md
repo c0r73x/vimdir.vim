@@ -48,6 +48,12 @@ To show hidden files and folders set this in your vimrc
 let g:vimdir_show_hidden = 1
 ```
 
+To force removal of files and folders set this in your vimrc
+(will add this to the overwrite code when its implemented)
+```
+let g:vimdir_force = 1
+```
+
 ## bin/vimdir
 
 You can use the bin/vimdir script to execute vimdir directly from the terminal.
@@ -55,5 +61,5 @@ Just place it in your path and run vimdir.
 
 ## Todo
 
-- Fix file swapping (a => b, b => a)
 - Add support to expand folders
+- Prompt for file overwrite

@@ -1,5 +1,5 @@
 " File:        vimdir.vim
-" Version:     0.0.1
+" Version:     0.0.2
 " Description: Manage files and directories in vim
 " Maintainer:  Christian Persson <c0r73x@gmail.com>
 " Repository:  https://github.com/c0r73x/vimdir.vim
@@ -22,6 +22,18 @@ if ! exists("g:vimdir_show_hidden")
     let g:vimdir_show_hidden = 0
 endif
 
+if ! exists("g:vimdir_force")
+    let g:vimdir_force = 0
+endif
+
+function! s:confirm(text, choices, default)
+    if g:vimdir_force == 0
+        return confirm(a:text, a:choices, a:default)
+    endif
+
+    return 1
+endfunction
+
 function! s:process()
     let l:remove = copy(b:sorted)
     let l:copy = []
@@ -41,21 +53,66 @@ function! s:process()
                 let l:fname = fnamemodify(expand(b:sorted[l:num]), ':p')
                 let l:tname = fnamemodify(expand(l:name), ':p')
 
+                if ! filereadable(l:fname)
+                    echohl ErrorMsg
+                                \ | echomsg b:sorted[l:num] . " does not exist!"
+                                \ | echohl None
+                    next
+                endif
+
                 let l:dir = fnamemodify(expand(l:name), ':p:h')
                 if ! isdirectory(l:dir)
                     call mkdir(l:dir, 'p')
+                endif
+
+                if filereadable(l:tname)
+                    let l:tmp = l:name . '~'
+                    let l:c = 0
+
+                    while filereadable(l:tmp)
+                        let l:c = l:c + 1
+                        let l:tmp = l:name . '~' . l:c
+                    endwhile
+
+                    if g:vimdir_verbose == 1
+                        echo "tmp move ".l:name.' => '.l:tmp
+                    endif
+
+                    if rename(l:name, l:tmp) != 0
+                        echohl ErrorMsg
+                                    \ | echomsg "Failed to rename "
+                                    \ . l:name . " to " . l:tmp ."!"
+                                    \ | echohl None
+                    endif
+
+                    for r in range(0, len(b:sorted) - 1)
+                        if l:name == b:sorted[r]
+                            let l:remove[r] = ''
+                            let b:sorted[r] = l:tmp
+                        endif
+                    endfor
                 endif
 
                 if exists("l:copy[".l:num."]")
                     if g:vimdir_verbose == 1
                         echo "copy ".b:sorted[l:num].' => '.l:name
                     endif
-                    call system("cp -r ".l:fname." ".l:tname)
+                    if system("cp -r ".l:fname." ".l:tname." 2>&1") != ''
+                        echohl ErrorMsg
+                                    \ | echomsg "Failed to copy "
+                                    \ . l:fname . " to " . l:tname ."!"
+                                    \ | echohl None
+                    endif
                 else
                     if g:vimdir_verbose == 1
                         echo "move ".b:sorted[l:num].' => '.l:name
                     endif
-                    call rename(l:fname, l:tname)
+                    if rename(l:fname, l:tname) != 0
+                        echohl ErrorMsg
+                                    \ | echomsg "Failed to rename "
+                                    \ . l:fname . " to " . l:tname ."!"
+                                    \ | echohl None
+                    endif
                 endif
             else
                 let l:name = b:sorted[l:num]
@@ -92,21 +149,26 @@ function! s:process()
             let b:sorted[r] = ''
             let l:rname = fnamemodify(expand(l:remove[r]), ':p')
 
-            if isdirectory(l:rname)
-                call system("rm -r " . l:rname . "&")
+            if(s:confirm("Are you sure you want to delete " . l:rname . "?",
+                        \ "&Yes\n&No",
+                        \ 1) == 1)
 
-                if g:vimdir_verbose == 1
-                    echo "removed ".l:remove[r]
-                endif
-            else
-                if delete(l:rname) == 0
+                if isdirectory(l:rname)
+                    call system("rm -r " . l:rname . "&")
+
                     if g:vimdir_verbose == 1
                         echo "removed ".l:remove[r]
                     endif
                 else
-                    echohl ErrorMsg
-                                \ | echomsg "Failed to remove " . l:remove[r]
-                                \ | echohl None
+                    if delete(l:rname) == 0
+                        if g:vimdir_verbose == 1
+                            echo "removed ".l:remove[r]
+                        endif
+                    else
+                        echohl ErrorMsg
+                                    \ | echomsg "Failed to remove " . l:remove[r]
+                                    \ | echohl None
+                    endif
                 endif
             endif
         end
