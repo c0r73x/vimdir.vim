@@ -1,5 +1,5 @@
 " File:        vimdir.vim
-" Version:     0.0.2
+" Version:     0.0.3
 " Description: Manage files and directories in vim
 " Maintainer:  Christian Persson <c0r73x@gmail.com>
 " Repository:  https://github.com/c0r73x/vimdir.vim
@@ -93,7 +93,7 @@ function! s:process()
                     endfor
                 endif
 
-                if exists("l:copy[".l:num."]")
+                if index(l:copy, l:num) != -1
                     if g:vimdir_verbose == 1
                         echo "copy ".b:sorted[l:num].' => '.l:name
                     endif
@@ -118,7 +118,7 @@ function! s:process()
                 let l:name = b:sorted[l:num]
             endif
 
-            call add(l:copy,1)
+            call add(l:copy,l:num)
             let b:sorted[l:num] = l:name
 
         elseif len(matchstr(l:line, '^\s*.*\/$')) > 0
