@@ -61,6 +61,5 @@ Just place it in your path and run vimdir.
 
 ## Todo
 
-- Fix renaming from lower case to uppercase, and vise versa
 - Add support to expand folders
 - Prompt for file overwrite
