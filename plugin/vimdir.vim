@@ -1,5 +1,5 @@
 " File:        vimdir.vim
-" Version:     0.0.3
+" Version:     0.0.4
 " Description: Manage files and directories in vim
 " Maintainer:  Christian Persson <c0r73x@gmail.com>
 " Repository:  https://github.com/c0r73x/vimdir.vim
@@ -49,11 +49,11 @@ function! s:process()
 
             let l:remove[l:num] = ''
 
-            if l:name != b:sorted[l:num]
+            if l:name !=# b:sorted[l:num]
                 let l:fname = fnamemodify(expand(b:sorted[l:num]), ':p')
                 let l:tname = fnamemodify(expand(l:name), ':p')
 
-                if ! filereadable(l:fname)
+                if ! filereadable(l:fname) && ! isdirectory(l:fname)
                     echohl ErrorMsg
                                 \ | echomsg b:sorted[l:num] . " does not exist!"
                                 \ | echohl None
@@ -97,7 +97,7 @@ function! s:process()
                     if g:vimdir_verbose == 1
                         echo "copy ".b:sorted[l:num].' => '.l:name
                     endif
-                    if system("cp -r ".l:fname." ".l:tname." 2>&1") != ''
+                    if system("cp -r '".l:fname."' '".l:tname."' 2>&1") != ''
                         echohl ErrorMsg
                                     \ | echomsg "Failed to copy "
                                     \ . l:fname . " to " . l:tname ."!"
@@ -136,7 +136,7 @@ function! s:process()
                 call mkdir(l:dir, 'p')
             endif
 
-            call system('touch ' . l:nfile)
+            call system("touch '" . l:nfile . "'")
 
             if g:vimdir_verbose == 1
                 echo 'created '.l:nfile
@@ -154,10 +154,10 @@ function! s:process()
                         \ 1) == 1)
 
                 if isdirectory(l:rname)
-                    call system("rm -r " . l:rname . "&")
+                    call system("rm -r '" . l:rname . "'")
 
                     if g:vimdir_verbose == 1
-                        echo "removed ".l:remove[r]
+                        echo "removed directory ".l:remove[r]
                     endif
                 else
                     if delete(l:rname) == 0
